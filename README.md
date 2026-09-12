@@ -180,6 +180,10 @@ All models export to **ONNX/TFLite** for on-device inference.
 - Offline map tile management
 - User-facing navigation UI
 
+> **Status:** the mobile app (`android-app/`) exists and already streams
+> sensors to the HTTP navigation service (`api/`) — see the *Navigation HTTP
+> Service* section. On-device inference and offline tiles remain future work.
+
 ---
 
 ## Team Ownership
@@ -216,6 +220,8 @@ intelligent-dead-reckoning/
 ├── scripts/                 # CLI entry points for pipeline stages
 ├── evaluation/              # Metrics, experiments, results, plots
 ├── tests/                   # Unit & integration tests
+├── api/                     # FastAPI navigation service (HTTP wrapper over IDREngine)
+├── android-app/             # Phase 2 mobile app (Expo) — consumes the HTTP API
 ├── docs/                    # Technical documentation
 ├── research/                # Papers, benchmarks, experiments, findings
 ├── README.md
@@ -223,8 +229,30 @@ intelligent-dead-reckoning/
 ├── .gitignore
 ├── requirements.txt
 ├── pyproject.toml
-└── .env.example
+├── .env.example
+├── railway.toml             # Railway/Nixpacks deploy config
+├── Procfile                 # Optional process metadata
+└── runtime.txt              # Python 3.13 pin for Railway
 ```
+
+---
+
+## Navigation HTTP Service
+
+Ships the `IDREngine` as a deployable FastAPI service so the mobile app keeps
+the online fusion loop on the backend (sensor streams in, fused
+GNSS-INS/dead-reckoned state out).
+
+```bash
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+python -m pytest tests/api -q     # HTTP + engine integration tests
+```
+
+* `docs/http_api.md` — the HTTP contract (modes, endpoints, error model)
+* `docs/backend.md` — architecture (adapter, session manager, ML wiring)
+* `docs/deployment.md` — Railway/Nixpacks deployment + env vars
+* `android-app/` — Expo client with `navigationApi.ts` + a backend-driven
+  position provider that dead-reckons through GNSS blackouts
 
 ---
 
@@ -276,18 +304,24 @@ We will systematically compare:
 
 ## Current Project Status
 
-**Phase 1: Scaffold Complete** ✅  
-All directories, configuration placeholders, empty implementation files, and documentation structure created.
+**Engine:** complete and tested — `IDREngine` with GNSS-INS fusion (EKF),
+dead reckoning, health/outage state machine, ML corrections (speed + IMU),
+non-holonomic/ZUPT constraints, confidence estimation. Full repo test suite
+green (`python -m pytest -q`).
+
+**Navigation HTTP Service:** live — `api/` wraps `IDREngine` behind FastAPI
+(session CRUD, IMU/GNSS update stream, model health, sanitized errors).
+Streams a real GNSS→fusion→blackout→dead-reckoning→recovery cycle end-to-end.
+
+**Mobile app:** initial backend integration shipped — Expo client with
+`navigationApi.ts` and a `BackendIdrPositionProvider` that dead-reckons
+through GNSS blackouts; mobile jest + tsc pass.
 
 **Next Steps:**
-1. Implement data pipeline (IO-VNBD download, smartphone extraction, synchronization)
-2. Build preprocessing & calibration modules
-3. Generate GNSS blackout scenarios
-4. Train baseline ML models
-5. Implement INS + EKF/UKF navigation core
-6. Add map matching & constraints
-7. Integrate IDREngine
-8. Run evaluation suite
+1. Deploy the navigation service (Railway) and set
+   `EXPO_PUBLIC_NAVIGATION_API_URL` in the app
+2. Field-test the blackout handoff on-device (tunnel/parking)
+3. On-device inference (TFLite) and offline tiles
 
 ---
 

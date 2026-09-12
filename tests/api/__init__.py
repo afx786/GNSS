@@ -1,0 +1,1 @@
+"""API test suite (FastAPI + real navigation engine)."""

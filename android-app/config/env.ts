@@ -24,6 +24,8 @@ export interface EnvConfig {
   /** Default vector style id when the user has not chosen one yet. */
   defaultMapStyleId: string;
   runtimeEnv: RuntimeEnv;
+  /** Base URL of the navigation backend (FastAPI). Empty = feature off. */
+  navigationApiUrl: string;
 }
 
 export const env: EnvConfig = {
@@ -35,6 +37,7 @@ export const env: EnvConfig = {
   defaultMapStyleId: process.env.EXPO_PUBLIC_DEFAULT_MAP_STYLE ?? 'liberty',
   runtimeEnv:
     process.env.EXPO_PUBLIC_APP_ENV === 'production' ? 'production' : 'development',
+  navigationApiUrl: process.env.EXPO_PUBLIC_NAVIGATION_API_URL ?? '',
 };
 
 /**
@@ -44,4 +47,12 @@ export const env: EnvConfig = {
  */
 export function isGraphHopperConfigured(): boolean {
   return env.graphhopperApiKey.length > 0;
+}
+
+/**
+ * True when the navigation backend is configured. The position pipeline falls
+ * back to pure GNSS when this is false — no fake IDR fix is ever emitted.
+ */
+export function isNavigationApiConfigured(): boolean {
+  return env.navigationApiUrl.trim().length > 0;
 }
