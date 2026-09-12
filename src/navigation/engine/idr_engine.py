@@ -62,6 +62,12 @@ class IDREngine:
         self.mode = "UNINITIALIZED"
         self._state = NavigationState()
         self._ml_position_error_m: float | None = None
+        # D-S10: corroboration from map matching. Set to 1.0 on every
+        # successful road snap; decays exponentially (tau = 30 s) so stale
+        # matches stop supporting the confidence estimate.
+        self._map_support = 0.0
+        self._map_support_time: float | None = None
+        self.map_support_tau_s = 30.0
 
     # ------------------------------------------------------------------ #
     # Lifecycle
@@ -75,6 +81,8 @@ class IDREngine:
         self.mode = "UNINITIALIZED"
         self._state = NavigationState()
         self._ml_position_error_m = None
+        self._map_support = 0.0
+        self._map_support_time = None
 
     def initialize(
         self,
@@ -172,8 +180,10 @@ class IDREngine:
     # Constraints & map matching
     # ------------------------------------------------------------------ #
 
-    def apply_non_holonomic_constraint(self) -> "NavigationState":
-        self.fusion.apply_lateral_constraint()
+    def apply_non_holonomic_constraint(
+        self, lateral_std_mps: float = 0.5
+    ) -> "NavigationState":
+        self.fusion.apply_lateral_constraint(lateral_std_mps)
         self._refresh_state(self._state.timestamp)
         return self.get_state()
 
@@ -204,6 +214,8 @@ class IDREngine:
                 matched.north_m,
                 std_m if std_m is not None else self.map_match_std_m,
             )
+            self._map_support = 1.0
+            self._map_support_time = self._state.timestamp
         self._refresh_state(self._state.timestamp)
         return self.get_state()
 
@@ -257,10 +269,17 @@ class IDREngine:
             s.position_error_m = max(base_error, float(self._ml_position_error_m))
         else:
             s.position_error_m = base_error
+        support = 0.0
+        if self._map_support_time is not None:
+            age = max(float(timestamp) - float(self._map_support_time), 0.0)
+            support = self._map_support * math.exp(
+                -age / max(self.map_support_tau_s, 1e-6)
+            )
         s.confidence = self.confidence.estimate(
             s.position_error_m,
             self.mode,
             gnss_age_s=self.fusion.gnss_age(timestamp),
+            support=support,
         )
         s.mode = self.mode
         self._state = s

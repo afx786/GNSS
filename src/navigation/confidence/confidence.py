@@ -5,7 +5,13 @@ navigation mode, and additionally degrades smoothly as a GNSS outage grows
 longer (unless map constraints / sensor consistency provide support):
 
     effective_error = max(position_error, drift_rate * gnss_age)
+    effective_error *= (1 - 0.5 * support)
     confidence      = exp(-effective_error / reference_error) * mode_factor
+
+``support`` in [0, 1] captures corroboration from map matching (a recent
+successful snap to the road network) or sensor consistency; it slows the
+outage degradation but can never raise confidence above the filter-based
+value.
 """
 
 from __future__ import annotations
@@ -35,6 +41,7 @@ class ConfidenceEstimator:
         position_error_m: float,
         mode: str,
         gnss_age_s: float | None = None,
+        support: float = 0.0,
     ) -> float:
         if not math.isfinite(float(position_error_m)):
             return self.minimum
@@ -47,6 +54,11 @@ class ConfidenceEstimator:
         if gnss_age_s is not None and gnss_age_s > 0.0:
             drift_error = self.drift_rate_mps * float(gnss_age_s)
             effective_error = max(effective_error, drift_error)
+
+        # Corroboration (recent map match / consistent sensors) slows the
+        # degradation; it never improves on the filter-based value.
+        clamped = min(max(float(support), 0.0), 1.0)
+        effective_error *= 1.0 - 0.5 * clamped
 
         confidence = math.exp(
             -effective_error / max(self.reference_error_m, 1e-6)
