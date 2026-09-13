@@ -30,8 +30,23 @@ describe('parsePoints', () => {
     ]);
   });
 
-  it('returns [] for empty input', () => {
+it('returns [] for empty input', () => {
     expect(parsePoints([])).toEqual([]);
+  });
+
+  it('parses GeoJSON LineString geometry', () => {
+    const pts = parsePoints({
+      type: 'LineString',
+      coordinates: [[55.0, 25.0], [55.1, 25.1]],
+    });
+    expect(pts).toEqual([
+      { latitude: 25.0, longitude: 55.0 },
+      { latitude: 25.1, longitude: 55.1 },
+    ]);
+  });
+
+  it('returns [] for non-array, non-LineString input', () => {
+    expect(parsePoints(null as never)).toEqual([]);
   });
 });
 

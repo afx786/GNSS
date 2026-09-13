@@ -95,7 +95,6 @@ export class GraphHopperRoutingService implements RoutingService {
     push('points_encoded', 'false');
     push('instructions', 'true');
     push('elevation', 'false');
-    push('details', '');
     if (request.options.alternatives && request.options.alternatives > 0) {
       push('alternative_route.max_paths', String(request.options.alternatives));
       push('alternative_route.max_weight_factor', '1.4');

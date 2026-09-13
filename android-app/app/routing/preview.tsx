@@ -12,6 +12,7 @@ import { Waypoint } from '@/components/MapAnnotations';
 import { ModeTabs } from '@/components/ModeTabs';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/Header';
+import { isGraphHopperConfigured } from '@/config/env';
 import { fonts, radius, spacing } from '@/constants/theme';
 import { estimateArrivalMillis, formatRemainingDuration } from '@/core/eta';
 import { TRAVEL_MODE_OPTIONS } from '@/types/routing';
@@ -49,7 +50,7 @@ export default function RoutePreviewScreen() {
 
   const startNavigation = useCallback(() => {
     actions.startNavigation();
-    router.replace('/navigation/index');
+    router.replace('/navigation');
   }, [actions, router]);
 
   return (
@@ -102,9 +103,11 @@ export default function RoutePreviewScreen() {
                 <Text style={[styles.errorMessage, { color: theme.colors.onErrorContainer, fontFamily: fonts.medium }]}>
                   {errorMessage}
                 </Text>
-                <Text style={[styles.errorHint, { color: theme.colors.onErrorContainer, fontFamily: fonts.regular }]}>
-                  Add EXPO_PUBLIC_GRAPHHOPPER_API_KEY to `.env`, or head to Profile → Demo mode.
-                </Text>
+                {!isGraphHopperConfigured() ? (
+                  <Text style={[styles.errorHint, { color: theme.colors.onErrorContainer, fontFamily: fonts.regular }]}>
+                    Add EXPO_PUBLIC_GRAPHHOPPER_API_KEY to `.env`, or head to Profile → Demo mode.
+                  </Text>
+                ) : null}
               </View>
             </View>
           ) : null}

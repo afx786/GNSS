@@ -24,7 +24,7 @@ export default function StepsScreen() {
 
   function start() {
     actions.startNavigation();
-    router.replace('/navigation/index');
+    router.replace('/navigation');
   }
 
   return (

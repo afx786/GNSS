@@ -25,10 +25,19 @@ export interface GraphHopperPath {
   distance: number;
   time: number;
   points_encoded: boolean;
-  points: Coordinate[] | [number, number][] | [number, number, number][];
+  /** Raw geometry as returned by the engine (array of [lng, lat] tuples or a GeoJSON LineString). */
+  points: Coordinate[] | [number, number][] | [number, number, number][] | GraphHopperLineString;
   instructions?: GraphHopperInstruction[];
   bbox?: number[];
 }
+
+export interface GraphHopperLineString {
+  type: 'LineString';
+  coordinates: [number, number][] | [number, number, number][];
+}
+
+/** Accepted raw point list shapes. */
+export type RawPoints = Coordinate[] | [number, number][] | [number, number, number][] | GraphHopperLineString;
 
 export interface GraphHopperRouteResponse {
   paths?: GraphHopperPath[];
@@ -89,9 +98,10 @@ function noInstructionManeuvers(points: Coordinate[], distanceMeters: number, du
   ];
 }
 
-export function parsePoints(raw: Coordinate[] | [number, number][]): Coordinate[] {
-  if (!Array.isArray(raw) || raw.length === 0) return [];
-  return raw
+export function parsePoints(raw: RawPoints): Coordinate[] {
+  const list = Array.isArray(raw) ? raw : raw?.type === 'LineString' ? raw.coordinates : [];
+  if (list.length === 0) return [];
+  return list
     .map((entry) => {
       if (Array.isArray(entry)) {
         const [lng, lat] = entry;
@@ -151,7 +161,7 @@ export interface NormalizedRouteInput {
 
 export function normalizePathToRoute(input: NormalizedRouteInput): Route {
   const { path, request } = input;
-  const geometry = parsePoints(path.points as [number, number][]);
+  const geometry = parsePoints(path.points);
   return {
     geometry,
     distanceMeters: Math.round(path.distance),
