@@ -1,7 +1,7 @@
 # Intelligent Dead Reckoning
 
 **AI-ML based Intelligent Dead Reckoning system for seamless navigation**  
-**Smart India Hackathon 2024 — Problem Statement 26168**  
+**Smart India Hackathon 2024 — Problem 26168**  
 **Organization: Indian Space Research Organisation (ISRO)**
 
 ---
