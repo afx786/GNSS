@@ -37,7 +37,7 @@ AI/ML Models (Speed, Vibration, IMU Correction, Fusion Correction)
        ↓
 Inertial Navigation (Dead Reckoning)
        ↓
-GNSS + INS Fusion (EKF/UKF)
+GNSS + INS Fusion 
        ↓
 Map Matching + Non-Holonomic Constraints
        ↓
