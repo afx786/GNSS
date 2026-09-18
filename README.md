@@ -57,7 +57,7 @@ Evaluation & Benchmarking
 | Accelerometer | ✅ Yes |
 | Gyroscope | ✅ Yes |
 | Magnetometer/Compass | ✅ Yes |
-| Smartphone GNSS/GPS | ✅ Yes (when available) |
+| Smartphone GNSS/GPS |  Yes (when available) |
 | Sensor timestamps | ✅ Yes |
 
 **The system must NOT require:**
