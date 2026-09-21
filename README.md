@@ -161,7 +161,7 @@ All models export to **ONNX/TFLite** for on-device inference.
 
 ❌ **Out of Scope (Phase 2):**
 - Android application
-- Mobile UI / map frontend
+- Mobile UI 
 - Real-time on-device optimization
 - Background location services
 - Battery optimization
