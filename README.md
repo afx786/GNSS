@@ -182,7 +182,7 @@ All models export to **ONNX/TFLite** for on-device inference.
 
 > **Status:** the mobile app (`android-app/`) exists and already streams
 > sensors to the HTTP navigation service (`api/`) — see the *Navigation HTTP
-> Service* section. On-device inference and offline tiles remain future work.
+> 
 
 ---
 
