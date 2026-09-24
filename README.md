@@ -79,7 +79,7 @@ The **IO-VNBD dataset** contains both smartphone-side and vehicle-side sensor da
 - **Vehicle-side/reference data** → Used **offline only** for:
   - Ground truth trajectory generation
   - Model supervision (speed, heading, position labels)
-  - Evaluation benchmarks
+  - Evaluation bench
   - GNSS blackout scenario validation
 
 ---
