@@ -321,7 +321,7 @@ through GNSS blackouts; mobile jest + tsc pass.
 1. Deploy the navigation service (Railway) and set
    `EXPO_PUBLIC_NAVIGATION_API_URL` in the app
 2. Field-test the blackout handoff on-device (tunnel/parking)
-3. On-device inference (TFLite) and offline tiles
+3. On-device inference (TFLite) 
 
 ---
 
